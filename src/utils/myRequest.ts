@@ -28,10 +28,9 @@ async function GetCurrentCookie() {
   let xm_sg_tk: string;
   let xm_sg_tk_sig: string;
   for (let cookie of cookies) {
-    cookie=cookie.trim();
+    cookie = cookie.trim();
     if (xm_sg_tk && xm_sg_tk && xm_sg_tk_sig) break;
     if (cookie.includes("xm_sg_tk")) {
-      console.log('cookie: ', cookie);
       if (cookie.includes("xm_sg_tk.sig")) {
         xm_sg_tk_sig = cookie.split("; ")[0];
       }
@@ -41,17 +40,15 @@ async function GetCurrentCookie() {
       }
     }
   }
-  
+
   instance.defaults.headers.cookie = `${xm_sg_tk}; ${xm_sg_tk_sig};`;
 
   return xm_sg_tk2;
 }
 
-export async function Get(url: string, config: AxiosRequestConfig) {
+export async function Get(url: string, config: AxiosRequestConfig = {params:{}}) {
   let xm = await GetCurrentCookie();
-  if (config.params?._q) {
-    config.params._s = getMD5(xm, url, JSON.stringify(config.params?._q));
-  }
+  config.params._s = getMD5(xm, url, config.params?._q ? JSON.stringify(config.params?._q) : "");
   let data = await instance.get(url, config);
   return data.data;
 }

@@ -1,14 +1,16 @@
 import Axios from 'axios';
 import * as Koa from 'koa';
-import { Get } from './myRequest';
+import { Get } from './src/utils/myRequest';
 import * as cheerio from 'cheerio';
+import { arrayLast } from './src/utils/utils';
 
 const app = new Koa();
 
-
+interface AnyObject{
+  [key:string]:string|number;
+}
 
 app.use(async ctx => {
-  console.log(ctx.path);
   if (ctx.path === "/getCollects") {
     let q = { "limit": 9, "order": "recommend", "page": 1 };
     let url = "collect/getCollects";
@@ -54,6 +56,40 @@ app.use(async ctx => {
       code:200,
       banners
     }
+  }
+  else if(ctx.path === "/dailySongs"){
+    let url="recommend/getDailySongs";
+    let data = await Get(url);
+    ctx.body = data;
+  }
+  else if(ctx.path === "/collectDetail"){
+    let url="collect/initialize"
+    let data = await Get(url, {
+      params: {
+        _q:{"listId":"955851266"},
+      }
+    });
+    ctx.body = data;
+  }
+  else if(ctx.path === "/search"){
+    let keyword=ctx.query.key;
+    let url="search/searchSongs";
+    let data = await Get(url, {
+      params: {
+        _q: {"key":keyword,"pagingVO":{"page":1,"pageSize":30}},
+      }
+    });
+    ctx.body = data;
+  }
+  else if(ctx.path === "/getPlayInfo"){
+    let songIds=JSON.parse(ctx.query.songIds);
+    let url="song/getPlayInfo";
+    let data = await Get(url, {
+      params: {
+        _q: {"songIds":songIds},
+      }
+    });
+    ctx.body = data;
   }
   else
     ctx.body = {
